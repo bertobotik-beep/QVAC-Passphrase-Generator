@@ -31,17 +31,23 @@ function parseLines(raw) {
     .filter((line) => line.length >= 6 && line.length <= 40 && /[a-zA-Z]{3,}/.test(line));
 }
 
+// Title-cases every word and joins them with no separator, e.g.
+// "sea breeze" -> "SeaBreeze". Used so a multi-word theme still produces a
+// single smashed-together token like the rest of the fallback ideas, instead
+// of leaving a raw space and lowercase trailing words (e.g. the old
+// `theme.charAt(0).toUpperCase() + theme.slice(1)` approach turned "sea
+// breeze" into "Sea breeze", not "SeaBreeze").
 function titleCaseWords(theme) {
   return theme
     .split(/\s+/)
+    .filter(Boolean)
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join("");
 }
 
 // Deterministic fallback ideas, always available regardless of model output.
 function fallbackIdeas(theme) {
-  const t = theme.trim();
-  const cap = t.charAt(0).toUpperCase() + t.slice(1);
+  const cap = titleCaseWords(theme.trim());
   return [
     `${cap}Sunrise7Whisper`,
     `Blue${cap}Wandering42`,
